@@ -3,7 +3,7 @@ spring:
     name: java-pro-spring
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
-  #  jdbc:postgresql://server/catalog?currentSchema=schema
+    #  jdbc:postgresql://server/catalog?currentSchema=schema
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: 352800
@@ -36,6 +36,20 @@ integrations:
     read-timeout: 30s
     write-timeout: 2s
   limits-service:
-    url: "http://localhost:8191/api/v1/clients"
+    url: "http://localhost:8191/api/v1/limits"
     read-timeout: 20s
     write-timeout: 1s
+
+
+integrations2:
+  services-properties:
+    -
+      name: "clients"
+      url: "http://localhost:8190/api/v1/clients"
+      read-timeout: 30s
+      write-timeout: 2s
+    -
+      name: "limits"
+      url: "http://localhost:8191/api/v1/limits"
+      read-timeout: 20s
+      write-timeout: 1s

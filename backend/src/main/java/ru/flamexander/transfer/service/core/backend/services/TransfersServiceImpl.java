@@ -12,6 +12,7 @@ import ru.flamexander.transfer.service.core.backend.errors.AppLogicException;
 import ru.flamexander.transfer.service.core.backend.repositories.TransfersRepository;
 import ru.flamexander.transfer.service.core.backend.validators.ExecuteTransferValidator;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -20,6 +21,7 @@ public class TransfersServiceImpl implements TransfersService {
     private final AccountsService accountsService;
     private final ExecuteTransferValidator executeTransferValidator;
     private final ClientsInfoService clientsInfoService;
+    private final LimitsInfoService limitsInfoService;
     private final AppProperties appProperties;
     private final TransfersRepository transfersRepository;
 
@@ -41,8 +43,12 @@ public class TransfersServiceImpl implements TransfersService {
 //                }
 //        ))
 
+        if (!limitsInfoService.isClientLimitOk(clientId,executeTransferDtoRequest.getTransferSum())) throw new AppLogicException("DAILY_LIMIT_EXCEEDED", "Сумма перевода " + executeTransferDtoRequest.getTransferSum() + " превышает остаток лимита");
+
         Account senderAccount = accountsService.findByClientIdAndAccountNumber(clientId, executeTransferDtoRequest.getSenderAccountNumber()).orElseThrow(() -> new AppLogicException("TRANSFER_SOURCE_ACCOUNT_NOT_FOUND", "Перевод невозможен поскольку не существует счет отправителя"));
         Account receiverAccount = accountsService.findByClientIdAndAccountNumber(executeTransferDtoRequest.getReceiverId(), executeTransferDtoRequest.getReceiverAccountNumber()).orElseThrow(() -> new AppLogicException("TRANSFER_TARGET_ACCOUNT_NOT_FOUND", "Перевод невозможен поскольку не существует счет получателяч"));
+
+        limitsInfoService.setLimitBalance(clientId,limitsInfoService.getLimitInfo(clientId).getLimit().subtract(executeTransferDtoRequest.getTransferSum()));
 
         senderAccount.setBalance(senderAccount.getBalance().subtract(executeTransferDtoRequest.getTransferSum()));
         receiverAccount.setBalance(receiverAccount.getBalance().add(executeTransferDtoRequest.getTransferSum()));
