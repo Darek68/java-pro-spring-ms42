@@ -32,4 +32,16 @@ public class AppConfig {
 //                .requestInitializer(myCustomInitializer)
                 .build();
     }
+    @Bean
+    @ConditionalOnMissingBean(RestTemplate.class)
+    public RestClient limitsInfoClient(LimitsServiceProperties properties) {
+        return RestClient.builder()
+                .requestFactory(new HttpComponentsClientHttpRequestFactory())
+                .baseUrl(properties.getUrl())
+//                .defaultUriVariables(Map.of("variable", "foo"))
+//                .defaultHeader("My-Header", "Foo")
+//                .requestInterceptor(myCustomInterceptor)
+//                .requestInitializer(myCustomInitializer)
+                .build();
+    }
 }
