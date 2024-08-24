@@ -17,7 +17,7 @@ import java.time.Duration;
         LimitsServiceProperties.class
 })
 public class AppConfig {
-    LimitsServiceProperties limitsServiceProperties;
+  //  LimitsServiceProperties limitsServiceProperties;
     //    @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -40,7 +40,7 @@ public class AppConfig {
     public RestClient limitsInfoClient(LimitsServiceProperties properties) {
         return RestClient.builder()
                // .requestFactory(new HttpComponentsClientHttpRequestFactory())
-                .requestFactory(getClientHttpRequestFactory())
+                .requestFactory(getClientHttpRequestFactory(properties))
                 .baseUrl(properties.getUrl())
 //                .defaultUriVariables(Map.of("variable", "foo"))
 //                .defaultHeader("My-Header", "Foo")
@@ -48,10 +48,10 @@ public class AppConfig {
 //                .requestInitializer(myCustomInitializer)
                 .build();
     }
-    private HttpComponentsClientHttpRequestFactory getClientHttpRequestFactory() {
+    private HttpComponentsClientHttpRequestFactory getClientHttpRequestFactory(LimitsServiceProperties properties) {
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        clientHttpRequestFactory.setConnectTimeout(limitsServiceProperties.getReadTimeout());
-        clientHttpRequestFactory.setConnectionRequestTimeout(limitsServiceProperties.getWriteTimeout());
+        clientHttpRequestFactory.setConnectTimeout(properties.getReadTimeout());
+        clientHttpRequestFactory.setConnectionRequestTimeout(properties.getWriteTimeout());
         return clientHttpRequestFactory;
     }
 }
