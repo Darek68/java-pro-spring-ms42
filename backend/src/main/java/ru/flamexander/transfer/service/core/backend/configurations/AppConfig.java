@@ -8,6 +8,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
 @Configuration
 @EnableConfigurationProperties({
         AppProperties.class,
@@ -15,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
         LimitsServiceProperties.class
 })
 public class AppConfig {
+    LimitsServiceProperties limitsServiceProperties;
     //    @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
@@ -36,12 +39,19 @@ public class AppConfig {
     @ConditionalOnMissingBean(RestTemplate.class)
     public RestClient limitsInfoClient(LimitsServiceProperties properties) {
         return RestClient.builder()
-                .requestFactory(new HttpComponentsClientHttpRequestFactory())
+               // .requestFactory(new HttpComponentsClientHttpRequestFactory())
+                .requestFactory(getClientHttpRequestFactory())
                 .baseUrl(properties.getUrl())
 //                .defaultUriVariables(Map.of("variable", "foo"))
 //                .defaultHeader("My-Header", "Foo")
 //                .requestInterceptor(myCustomInterceptor)
 //                .requestInitializer(myCustomInitializer)
                 .build();
+    }
+    private HttpComponentsClientHttpRequestFactory getClientHttpRequestFactory() {
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        clientHttpRequestFactory.setConnectTimeout(limitsServiceProperties.getReadTimeout());
+        clientHttpRequestFactory.setConnectionRequestTimeout(limitsServiceProperties.getWriteTimeout());
+        return clientHttpRequestFactory;
     }
 }
